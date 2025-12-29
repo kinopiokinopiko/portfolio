@@ -1,230 +1,252 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}資産管理システム{% endblock %}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}資産管理アプリ{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
-        // Apply theme immediately to prevent flash
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans JP', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
     </script>
     <style>
-        :root {
-            /* Light Theme Variables */
-            --bg-color: #f5f5f5;
-            --text-color: #333333;
-            --text-secondary: #666666;
-            --card-bg: #ffffff;
-            --border-color: #dddddd;
-            --input-bg: #ffffff;
-            --input-border: #ddd;
-            --shadow-color: rgba(0,0,0,0.08);
-            --header-bg: #ffffff;
-            --accent-color: #007bff;
-            --accent-hover: #0056b3;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --hover-bg: #f8f9fa;
-            --chip-bg: #f1f3f5;
-            --chip-selected-bg: #e7f3ff;
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
         }
-
-        [data-theme="dark"] {
-            /* Dark Theme Variables */
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --card-bg: #1e1e1e;
-            --border-color: #333333;
-            --input-bg: #2d2d2d;
-            --input-border: #444;
-            --shadow-color: rgba(0,0,0,0.5);
-            --header-bg: #1e1e1e;
-            --accent-color: #4da3ff;
-            --accent-hover: #1a73e8;
-            --success-color: #4cd964;
-            --danger-color: #ff5252;
-            --hover-bg: #2d2d2d;
-            --chip-bg: #333;
-            --chip-selected-bg: #1a3c61;
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-
-        * {
-            box-sizing: border-box;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
-            margin: 0; 
-            padding: 0; 
-            background: var(--bg-color); 
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
         }
-        .container { 
-            max-width: 100%; 
-            margin: 0 auto; 
-            padding: 16px;
-            padding-bottom: 80px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
-        
-        /* Alert Styles */
-        .alert { 
-            padding: 24px 20px; 
-            margin: 20px auto;
-            max-width: 90%;
-            width: 100%;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            animation: slideDown 0.3s ease-out;
-            box-shadow: 0 4px 12px var(--shadow-color);
+        .dark ::-webkit-scrollbar-track {
+            background: #2d3748;
         }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .alert-success { 
-            background: rgba(40, 167, 69, 0.2); 
-            color: var(--success-color); 
-            border: 2px solid var(--success-color); 
-        }
-        
-        .alert-error { 
-            background: rgba(220, 53, 69, 0.2); 
-            color: var(--danger-color); 
-            border: 2px solid var(--danger-color); 
-        }
-
-        /* Toggle Button Styles */
-        .theme-toggle-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px var(--shadow-color);
-            z-index: 9999;
-        }
-        .theme-toggle-btn:hover {
-            transform: scale(1.05);
-            background: var(--hover-bg);
-        }
-        .theme-toggle-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        @media (min-width: 768px) {
-            .alert {
-                max-width: 600px;
-                padding: 28px 24px;
-                font-size: 20px;
-            }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4a5568;
         }
     </style>
-    {% block extra_styles %}{% endblock %}
 </head>
-<body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert {% if category == 'error' %}alert-error{% else %}alert-success{% endif %}">
-                    {{ message }}
+<body class="bg-gray-50 dark:bg-gray-900 flex flex-col h-full transition-colors duration-300">
+    <nav class="bg-white dark:bg-gray-800 shadow-sm fixed w-full z-10 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{{ url_for('dashboard') }}" class="text-xl font-bold text-primary-600 dark:text-primary-400 flex items-center">
+                            <i class="fas fa-coins mr-2"></i>
+                            資産管理
+                        </a>
+                    </div>
+                    {% if current_user.is_authenticated %}
+                    <div class="hidden md:ml-6 md:flex md:space-x-8">
+                        <a href="{{ url_for('dashboard') }}" class="border-transparent text-gray-500 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            ダッシュボード
+                        </a>
+                        <a href="{{ url_for('manage_assets') }}" class="border-transparent text-gray-500 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200">
+                            資産管理
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
-    
-    <!-- Theme Toggle Logic -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            
-            // Create Toggle Button
-            const btn = document.createElement('button');
-            btn.className = 'theme-toggle-btn';
-            btn.setAttribute('aria-label', 'Toggle Dark Mode');
-            
-            // Icons
-            const sunIcon = `<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>`;
-            const moonIcon = `<svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>`;
-            
-            function updateIcon(theme) {
-                if (theme === 'dark') {
-                    btn.innerHTML = moonIcon;
-                } else {
-                    btn.innerHTML = sunIcon;
-                }
-            }
-            updateIcon(currentTheme);
-            
-            btn.onclick = function() {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                const newTheme = isDark ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateIcon(newTheme);
-            };
+                <div class="flex items-center">
+                    {% if current_user.is_authenticated %}
+                    <div class="hidden md:flex items-center space-x-4">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">ようこそ, {{ current_user.username }}さん</span>
+                        <a href="{{ url_for('logout') }}" id="logoutLink" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors duration-200" title="ログアウト">
+                            <i class="fas fa-sign-out-alt text-lg"></i>
+                        </a>
+                        <button id="darkModeToggle" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors duration-200 focus:outline-none" title="ダークモード切替">
+                            <i class="fas fa-moon text-lg" id="darkModeIcon"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="{{ url_for('login') }}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">ログイン</a>
+                        <a href="{{ url_for('register') }}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 shadow-sm">新規登録</a>
+                        <button id="darkModeToggle" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors duration-200 focus:outline-none" title="ダークモード切替">
+                            <i class="fas fa-moon text-lg" id="darkModeIcon"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                    <div class="-mr-2 flex items-center md:hidden">
+                        <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500" aria-controls="mobile-menu" aria-expanded="false" id="mobileMenuButton">
+                            <span class="sr-only">メニューを開く</span>
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            // Intelligent Injection Logic to avoid layout overlap
-            const headerBar = document.querySelector('.header-bar'); // Dashboard header
-            const manageHeader = document.querySelector('.header'); // Manage/Edit Assets header
-            
-            if (headerBar) {
-                // Dashboard: Group with the last element (Logout button)
-                const lastChild = headerBar.lastElementChild;
-                if (lastChild) {
-                    const wrapper = document.createElement('div');
-                    wrapper.style.display = 'flex';
-                    wrapper.style.alignItems = 'center';
-                    wrapper.style.gap = '12px';
-                    
-                    headerBar.replaceChild(wrapper, lastChild);
-                    wrapper.appendChild(lastChild);
-                    wrapper.appendChild(btn);
-                } else {
-                    headerBar.appendChild(btn);
-                }
-            } else if (manageHeader) {
-                // Manage Assets: Absolute position inside relative header
-                // Ensure header has relative positioning
-                const style = window.getComputedStyle(manageHeader);
-                if (style.position === 'static') {
-                    manageHeader.style.position = 'relative';
-                }
-                btn.style.position = 'absolute';
-                btn.style.top = '20px';
-                btn.style.right = '20px';
-                manageHeader.appendChild(btn);
+        <div class="md:hidden hidden bg-white dark:bg-gray-800 shadow-lg" id="mobileMenu">
+            <div class="pt-2 pb-3 space-y-1">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-primary-500 hover:text-primary-700 dark:hover:text-primary-400 transition-colors duration-200">ダッシュボード</a>
+                <a href="{{ url_for('manage_assets') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-primary-500 hover:text-primary-700 dark:hover:text-primary-400 transition-colors duration-200">資産管理</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-primary-500 hover:text-primary-700 dark:hover:text-primary-400 transition-colors duration-200">ログイン</a>
+                <a href="{{ url_for('register') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-primary-500 hover:text-primary-700 dark:hover:text-primary-400 transition-colors duration-200">新規登録</a>
+                {% endif %}
+            </div>
+            <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center px-4 space-x-4">
+                    {% if current_user.is_authenticated %}
+                    <div class="flex-shrink-0">
+                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ current_user.username }}</span>
+                    </div>
+                    <a href="{{ url_for('logout') }}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 p-2 rounded-md text-sm font-medium flex items-center transition-colors duration-200" title="ログアウト">
+                        <i class="fas fa-sign-out-alt text-lg"></i>
+                    </a>
+                    {% endif %}
+                    <button id="mobileDarkModeToggle" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 p-2 rounded-md text-sm font-medium flex items-center transition-colors duration-200 focus:outline-none" title="ダークモード切替">
+                        <i class="fas fa-moon text-lg" id="mobileDarkModeIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-16">
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div id="flash-messages" class="fixed top-16 right-4 z-50 w-full max-w-sm">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert-message mb-4 px-4 py-3 rounded relative text-white shadow-lg transition-all duration-500 ease-in-out transform translate-y-0 opacity-100
+                                {% if category == 'success' %}bg-green-500{% elif category == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %}"
+                                role="alert">
+                                <span class="block sm:inline">{{ message }}</span>
+                                <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" onclick="this.parentElement.remove();">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="bg-white dark:bg-gray-800 shadow-inner py-4 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 dark:text-gray-400 text-sm">
+                &copy; 2023 資産管理アプリ. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // ダークモード切替
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const mobileDarkModeToggle = document.getElementById('mobileDarkModeToggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const mobileDarkModeIcon = document.getElementById('mobileDarkModeIcon');
+        const html = document.documentElement;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                html.classList.add('dark');
+                darkModeIcon.classList.remove('fa-moon');
+                darkModeIcon.classList.add('fa-sun');
+                mobileDarkModeIcon.classList.remove('fa-moon');
+                mobileDarkModeIcon.classList.add('fa-sun');
+                localStorage.setItem('darkMode', 'true');
             } else {
-                // Fallback (Login, Register): Fixed top-right
-                btn.style.position = 'fixed';
-                btn.style.top = '16px';
-                btn.style.right = '16px';
-                document.body.appendChild(btn);
+                html.classList.remove('dark');
+                darkModeIcon.classList.remove('fa-sun');
+                darkModeIcon.classList.add('fa-moon');
+                mobileDarkModeIcon.classList.remove('fa-sun');
+                mobileDarkModeIcon.classList.add('fa-moon');
+                localStorage.setItem('darkMode', 'false');
+            }
+        }
+
+        // 初期設定
+        if (localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setDarkMode(true);
+        } else {
+            setDarkMode(false);
+        }
+
+        // イベントリスナー
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', () => {
+                setDarkMode(!html.classList.contains('dark'));
+            });
+        }
+        if (mobileDarkModeToggle) {
+            mobileDarkModeToggle.addEventListener('click', () => {
+                setDarkMode(!html.classList.contains('dark'));
+            });
+        }
+
+        // モバイルメニュー切替
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+                mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // 変更: フラッシュメッセージを2秒後に自動的に隠す
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert-message');
+            if (alerts.length > 0) {
+                setTimeout(function() {
+                    alerts.forEach(function(alert) {
+                        // 上にスライドしてフェードアウトするクラスを追加
+                        alert.classList.remove('translate-y-0', 'opacity-100');
+                        alert.classList.add('-translate-y-full', 'opacity-0');
+                        
+                        // アニメーション完了後に要素を削除（オプション）
+                        setTimeout(function() {
+                            alert.remove();
+                        }, 500); // duration-500 と合わせる
+                    });
+                }, 2000); // 2秒後に開始
             }
         });
     </script>
-    
     {% block scripts %}{% endblock %}
 </body>
 </html>
