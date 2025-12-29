@@ -30,7 +30,7 @@
     .header-title {
         font-size: 20px;
         font-weight: 700;
-        color: #333;
+        color: var(--text-color);
         flex: 1;
         text-align: center;
         letter-spacing: -0.5px;
@@ -41,7 +41,7 @@
         border: none;
         cursor: pointer;
         padding: 8px;
-        color: #333;
+        color: var(--text-color);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -82,20 +82,20 @@
     }
     
     .total-card {
-        background: white;
+        background: var(--card-bg);
         border-radius: 16px;
         padding: 32px 24px;
         text-align: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px var(--shadow-color);
         display: flex;
         flex-direction: column;
         justify-content: center;
-        border: 1px solid #f0f0f0;
+        border: 1px solid var(--border-color);
     }
     
     .total-label {
         font-size: 14px;
-        color: #999;
+        color: var(--text-secondary);
         margin-bottom: 12px;
         font-weight: 700;
         text-transform: uppercase;
@@ -105,7 +105,7 @@
     .total-amount {
         font-size: 52px;
         font-weight: 700;
-        color: #333;
+        color: var(--text-color);
         margin-bottom: 32px;
         letter-spacing: -1.5px;
         line-height: 1.1;
@@ -139,7 +139,7 @@
     .profit-label,
     .day-change-label {
         font-size: 15px;
-        color: #666;
+        color: var(--text-secondary);
         font-weight: 700;
     }
     
@@ -154,12 +154,12 @@
     
     .profit-badge.positive,
     .day-change-badge.positive {
-        background: #dc3545;
+        background: var(--danger-color);
     }
     
     .profit-badge.negative,
     .day-change-badge.negative {
-        background: #28a745;
+        background: var(--success-color);
     }
     
     .profit-badge.zero,
@@ -178,22 +178,22 @@
     
     .profit-amount.positive,
     .day-change-amount.positive {
-        color: #dc3545;
+        color: var(--danger-color);
     }
     
     .profit-amount.negative,
     .day-change-amount.negative {
-        color: #28a745;
+        color: var(--success-color);
     }
     
     .profit-amount.zero,
     .day-change-amount.zero {
-        color: #333;
+        color: var(--text-color);
     }
     
     .update-time {
         font-size: 13px;
-        color: #999;
+        color: var(--text-secondary);
         margin-top: 16px;
         font-weight: 600;
     }
@@ -208,7 +208,7 @@
     }
     
     .asset-card {
-        background: white;
+        background: var(--card-bg);
         border-radius: 14px;
         padding: 12px;
         cursor: pointer;
@@ -217,15 +217,15 @@
         color: inherit;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        border: 1px solid #f0f0f0;
+        box-shadow: 0 2px 8px var(--shadow-color);
+        border: 1px solid var(--border-color);
         min-height: auto;
         width: 100%;
         min-width: 0;
     }
     
     .asset-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        box-shadow: 0 4px 16px var(--shadow-color);
         transform: translateY(-2px);
     }
     
@@ -259,7 +259,7 @@
     
     .card-name-new {
         font-size: 11px;
-        color: #999;
+        color: var(--text-secondary);
         margin-bottom: 3px;
         font-weight: 600;
         white-space: nowrap;
@@ -270,7 +270,7 @@
     .card-amount-new {
         font-size: 17px;
         font-weight: 700;
-        color: #333;
+        color: var(--text-color);
         letter-spacing: -0.5px;
         white-space: nowrap;
         overflow: hidden;
@@ -292,7 +292,7 @@
     
     .detail-label {
         font-size: 10px;
-        color: #999;
+        color: var(--text-secondary);
         font-weight: 600;
         min-width: 36px;
         flex-shrink: 0;
@@ -309,11 +309,11 @@
     }
     
     .detail-badge.positive {
-        background: #dc3545;
+        background: var(--danger-color);
     }
     
     .detail-badge.negative {
-        background: #28a745;
+        background: var(--success-color);
     }
     
     .detail-badge.zero {
@@ -330,25 +330,25 @@
         text-overflow: ellipsis;
     }
     
-    .profit-plus { color: #dc3545; }
-    .profit-minus { color: #28a745; }
-    .zero { color: #333; }
+    .profit-plus { color: var(--danger-color); }
+    .profit-minus { color: var(--success-color); }
+    .zero { color: var(--text-color); }
 
     .chart-container-with-tabs {
-        background: white;
+        background: var(--card-bg);
         border-radius: 16px;
         padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px var(--shadow-color);
         height: 450px;
         margin-bottom: 24px;
         display: flex;
         flex-direction: column;
-        border: 1px solid #f0f0f0;
+        border: 1px solid var(--border-color);
     }
 
     .tab-nav {
         display: flex;
-        border-bottom: 2px solid #f0f0f0;
+        border-bottom: 2px solid var(--border-color);
         flex-shrink: 0;
         margin-bottom: 12px;
         overflow-x: auto;
@@ -362,7 +362,7 @@
         background: none;
         border: none;
         font-size: 14px;
-        color: #999;
+        color: var(--text-secondary);
         border-bottom: 3px solid transparent;
         transition: all 0.2s ease;
         font-weight: 700;
@@ -372,12 +372,12 @@
     }
     
     .tab-btn.active {
-        color: #333;
-        border-bottom-color: #007bff;
+        color: var(--text-color);
+        border-bottom-color: var(--accent-color);
     }
 
     .tab-btn:hover:not(.active) {
-        color: #666;
+        color: var(--text-secondary);
     }
     
     .tab-content-wrapper {
@@ -423,6 +423,7 @@
         font-weight: 600;
         white-space: nowrap;
         flex-shrink: 0;
+        color: var(--text-color);
     }
     
     .legend-controls input[type="checkbox"] {
