@@ -15,6 +15,7 @@
             padding: 0; 
             background: #f5f5f5; 
             color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .container { 
             max-width: 100%; 
@@ -70,12 +71,225 @@
         }
     </style>
     {% block extra_styles %}{% endblock %}
+
+    <!-- 🌙 ダークモード用スタイル（全ページ共通の上書き設定） -->
+    <style>
+        /* トグルボタンのスタイル */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .theme-icon {
+            width: 24px;
+            height: 24px;
+            stroke: #333;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: all 0.3s ease;
+        }
+
+        /* ダークモード時の基本スタイル */
+        body.dark-mode {
+            background: #121212 !important; /* ログイン画面のグラデーションなども上書き */
+            color: #e0e0e0;
+        }
+
+        /* ダークモード時のトグルボタン */
+        body.dark-mode .theme-toggle-btn {
+            background: rgba(45, 45, 55, 0.9);
+            border-color: #555;
+        }
+
+        body.dark-mode .theme-icon {
+            stroke: #ffd700; /* 太陽の色 */
+        }
+
+        /* カード・コンテナ等の背景色上書き */
+        body.dark-mode .total-card,
+        body.dark-mode .asset-card,
+        body.dark-mode .summary-card,
+        body.dark-mode .stock-card,
+        body.dark-mode .chart-container-with-tabs,
+        body.dark-mode .header,
+        body.dark-mode .edit-form,
+        body.dark-mode .login-container,
+        body.dark-mode .register-container,
+        body.dark-mode .form-modal {
+            background: #1e1e1e !important;
+            border-color: #333 !important;
+            color: #e0e0e0 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+        }
+
+        /* テキストカラーの調整 */
+        body.dark-mode h1, 
+        body.dark-mode h2, 
+        body.dark-mode h3, 
+        body.dark-mode .header-title,
+        body.dark-mode .total-amount,
+        body.dark-mode .card-amount-new,
+        body.dark-mode .stock-symbol,
+        body.dark-mode .summary-value,
+        body.dark-mode .stock-price,
+        body.dark-mode .profit-amount.zero,
+        body.dark-mode .detail-value {
+            color: #ffffff !important;
+        }
+
+        body.dark-mode .total-label,
+        body.dark-mode .card-name-new,
+        body.dark-mode .detail-label,
+        body.dark-mode .summary-title,
+        body.dark-mode .stock-name,
+        body.dark-mode .stock-profit-label,
+        body.dark-mode .form-group label,
+        body.dark-mode .update-time,
+        body.dark-mode .register-link,
+        body.dark-mode .register-link p {
+            color: #aaa !important;
+        }
+
+        /* 入力フォーム */
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="number"],
+        body.dark-mode input[type="password"],
+        body.dark-mode select {
+            background: #2d2d2d !important;
+            border-color: #444 !important;
+            color: #fff !important;
+        }
+
+        body.dark-mode input:focus,
+        body.dark-mode select:focus {
+            border-color: #667eea !important;
+            background: #333 !important;
+        }
+        
+        /* 読み取り専用インプット */
+        body.dark-mode input[readonly] {
+            background: #252525 !important;
+            color: #888 !important;
+        }
+
+        /* 二次的な背景色（詳細エリアなど） */
+        body.dark-mode .stock-details,
+        body.dark-mode .stock-profit-box,
+        body.dark-mode .chip,
+        body.dark-mode .password-requirements {
+            background: #252525 !important;
+            border-color: #333 !important;
+        }
+        
+        body.dark-mode .stock-header {
+            border-bottom-color: #333 !important;
+        }
+
+        /* ボタン・アイコン */
+        body.dark-mode .icon-btn {
+            color: #fff !important;
+        }
+        
+        body.dark-mode .back-link {
+            color: #66b0ff !important;
+        }
+
+        /* モーダルオーバーレイ */
+        body.dark-mode .form-overlay {
+            background: rgba(0,0,0,0.85) !important;
+        }
+        body.dark-mode .form-close {
+            color: #aaa !important;
+        }
+        
+        /* タブ */
+        body.dark-mode .tab-nav {
+            border-bottom-color: #333 !important;
+        }
+        body.dark-mode .tab-btn {
+            color: #888;
+        }
+        body.dark-mode .tab-btn.active {
+            color: #fff;
+            border-bottom-color: #66b0ff !important;
+        }
+        body.dark-mode .tab-btn:hover:not(.active) {
+            color: #bbb;
+        }
+        
+        /* チップ（ラジオボタン） */
+        body.dark-mode .chip.selected {
+            background: rgba(0, 123, 255, 0.2) !important;
+            border-color: #0056b3 !important;
+        }
+        body.dark-mode .chip .chip-label {
+            color: #ddd;
+        }
+        body.dark-mode .chip.selected .chip-label {
+            color: #66b0ff;
+        }
+
+        /* アラート */
+        body.dark-mode .alert-success {
+            background: rgba(21, 87, 36, 0.3) !important;
+            color: #75b798 !important;
+            border-color: #1e7e34 !important;
+        }
+        body.dark-mode .alert-error {
+            background: rgba(114, 28, 36, 0.3) !important;
+            color: #ea868f !important;
+            border-color: #842029 !important;
+        }
+        
+        /* ログインページ専用 */
+        body.dark-mode .demo-hint {
+            background: rgba(102, 126, 234, 0.1) !important;
+            border-color: #4a5b9c !important;
+            color: #8fa0ff !important;
+        }
+    </style>
 </head>
 <body>
+    <!-- ☀️ ダークモード切替ボタン -->
+    <button class="theme-toggle-btn" id="themeToggle" aria-label="テーマ切替">
+        <svg class="theme-icon" viewBox="0 0 24 24" id="themeIcon">
+            <!-- デフォルトは太陽アイコン -->
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <!-- ✅ 修正: alert のクラスを正しく指定 -->
                 <div class="alert {% if category == 'error' %}alert-error{% else %}alert-success{% endif %}">
                     {{ message }}
                 </div>
@@ -86,6 +300,56 @@
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+    
+    <script>
+        (function() {
+            // ローカルストレージから設定を読み込み
+            const savedTheme = localStorage.getItem('theme');
+            const themeToggleBtn = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // 初期設定の適用
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+                updateChartDefaults(true);
+            } else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                // 設定がない場合、システムの好みに合わせる
+                body.classList.add('dark-mode');
+                updateChartDefaults(true);
+            } else {
+                updateChartDefaults(false);
+            }
+
+            // Chart.jsのデフォルト色を更新する関数
+            function updateChartDefaults(isDark) {
+                if (window.Chart) {
+                    Chart.defaults.color = isDark ? '#e0e0e0' : '#666';
+                    Chart.defaults.borderColor = isDark ? '#444' : '#e0e0e0';
+                    // 既存のチャートがある場合はページリロードが必要な場合が多いが、
+                    // 新規描画時はこれで適用される
+                }
+            }
+
+            // ボタンクリック時の処理
+            themeToggleBtn.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                const isDark = body.classList.contains('dark-mode');
+                
+                // 設定を保存
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                
+                // チャートの設定を更新（動的反映のためにはリロードが確実だが、設定値は更新）
+                updateChartDefaults(isDark);
+                
+                // チャートが存在するページならリロードを促すか、自動リロード
+                if (document.querySelector('canvas')) {
+                    // チャートの色を即座に反映させるのは難しいため、
+                    // ユーザー体験のためにはリロードしない方が良いが、色が合わない場合がある。
+                    // ここではリロードせずにCSS変数が適用される範囲で対応
+                }
+            });
+        })();
+    </script>
     
     {% block scripts %}{% endblock %}
 </body>
