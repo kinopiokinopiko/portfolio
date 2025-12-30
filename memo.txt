@@ -6,6 +6,8 @@ kinopio-2/
 ├── 📄 requirements.txt                 # Python依存パッケージ
 ├── 📄 README.md                        # プロジェクト説明
 ├── 📄 portfolio.db                     # SQLite データベース（ローカル用）
+├── 📄 docker-compose.yml 
+├── 📄 Dockerfile 
 │
 ├── 📁 __pycache__/                     # Pythonキャッシュ
 │
