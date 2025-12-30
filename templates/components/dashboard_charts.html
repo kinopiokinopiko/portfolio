@@ -1,9 +1,20 @@
 <!-- チャートセクション -->
 <div class="chart-container-with-tabs">
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="showTab('portfolio', this)">ポートフォリオ</button>
-        <button class="tab-btn" onclick="showTab('line', this)">折れ線グラフ推移</button>
-        <button class="tab-btn" onclick="showTab('bar', this)">棒グラフ推移</button>
+        <!-- ポートフォリオ（円グラフアイコン） -->
+        <button class="tab-btn active" onclick="showTab('portfolio', this)" title="ポートフォリオ">
+            <svg viewBox="0 0 24 24">
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+            </svg>
+        </button>
+        <!-- 資産推移（折れ線グラフアイコン） -->
+        <button class="tab-btn" onclick="showTab('line', this)" title="資産推移">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 3v18h18"/>
+                <path d="M18.5 8.1l-5.1 5.2-2.8-2.7L7 14.3"/>
+            </svg>
+        </button>
     </div>
 
     <div class="tab-content-wrapper">
@@ -39,7 +50,8 @@
                 </label>
                 <label class="legend-item">
                     <input type="checkbox" class="line-toggle" data-dataset-index="4">
-                    <span class="legend-color-box" style="background-color: #E9C46A;"></span>金
+                    <!-- 変更: 金 -> 貴金属 -->
+                    <span class="legend-color-box" style="background-color: #E9C46A;"></span>貴金属
                 </label>
                 <label class="legend-item">
                     <input type="checkbox" class="line-toggle" data-dataset-index="5">
@@ -56,47 +68,6 @@
             </div>
             <div class="chart-canvas-container">
                 <canvas id="assetLineChart"></canvas>
-            </div>
-        </div>
-
-        <!-- 棒グラフ -->
-        <div id="bar-content" class="tab-content">
-            <div class="legend-controls">
-                <label class="legend-item">
-                    <input type="checkbox" id="toggle-all-bars" checked>
-                    <b>全選択</b>
-                </label>
-                <label class="legend-item">
-                    <input type="checkbox" class="bar-toggle" data-dataset-index="0" checked>
-                    <span class="legend-color-box" style="background-color: #E63946;"></span>日本株
-                </label>
-                <label class="legend-item">
-                    <input type="checkbox" class="bar-toggle" data-dataset-index="1" checked>
-                    <span class="legend-color-box" style="background-color: #457B9D;"></span>米国株
-                </label>
-                <label class="legend-item">
-                    <input type="checkbox" class="bar-toggle" data-dataset-index="2" checked>
-                    <span class="legend-color-box" style="background-color: #F4A261;"></span>現金
-                </label>
-                <label class="legend-item">
-                    <input type="checkbox" class="bar-toggle" data-dataset-index="3" checked>
-                    <span class="legend-color-box" style="background-color: #E9C46A;"></span>金
-                </label>
-                <label class="legend-item">
-                    <input type="checkbox" class="bar-toggle" data-dataset-index="4" checked>
-                    <span class="legend-color-box" style="background-color: #9B5DE5;"></span>暗号資産
-                </label>
-                <label class="legend-item">
-                    <input type="checkbox" class="bar-toggle" data-dataset-index="5" checked>
-                    <span class="legend-color-box" style="background-color: #52B788;"></span>投資信託
-                </label>
-                <label class="legend-item">
-                    <input type="checkbox" class="bar-toggle" data-dataset-index="6" checked>
-                    <span class="legend-color-box" style="background-color: #F15BB5;"></span>保険
-                </label>
-            </div>
-            <div class="chart-canvas-container">
-                <canvas id="assetHistoryChart"></canvas>
             </div>
         </div>
     </div>

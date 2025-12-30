@@ -53,16 +53,17 @@ def manage_assets(asset_type):
         with db_manager.get_db() as conn:
             c = conn.cursor()
             
+            # ソート順を display_order, symbol の順に変更
             if db_manager.use_postgres:
                 c.execute('''SELECT id, symbol, name, quantity, price, avg_cost
                             FROM assets 
                             WHERE user_id = %s AND asset_type = %s
-                            ORDER BY symbol''', (user_id, asset_type))
+                            ORDER BY display_order ASC, symbol ASC''', (user_id, asset_type))
             else:
                 c.execute('''SELECT id, symbol, name, quantity, price, avg_cost
                             FROM assets 
                             WHERE user_id = ? AND asset_type = ?
-                            ORDER BY symbol''', (user_id, asset_type))
+                            ORDER BY display_order ASC, symbol ASC''', (user_id, asset_type))
             
             assets = c.fetchall()
             
@@ -90,6 +91,7 @@ def manage_assets(asset_type):
                                  assets=assets_list,
                                  user_name=user_name,
                                  crypto_symbols=constants.CRYPTO_SYMBOLS,
+                                 precious_metal_symbols=constants.PRECIOUS_METAL_SYMBOLS, # 追加
                                  investment_trust_symbols=constants.INVESTMENT_TRUST_SYMBOLS,
                                  insurance_types=constants.INSURANCE_TYPES)
     
@@ -97,6 +99,37 @@ def manage_assets(asset_type):
         logger.error(f"❌ Error loading assets for {asset_type}: {e}", exc_info=True)
         flash('資産の読み込み中にエラーが発生しました', 'error')
         return redirect(url_for('dashboard.dashboard'))
+
+@assets_bp.route('/assets/reorder', methods=['POST'])
+def reorder_assets():
+    """資産の並び順を更新"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        data = request.json
+        asset_ids = data.get('asset_ids', [])
+        
+        if not asset_ids:
+            return jsonify({'message': 'No changes'}), 200
+            
+        with db_manager.get_db() as conn:
+            c = conn.cursor()
+            for index, asset_id in enumerate(asset_ids):
+                if db_manager.use_postgres:
+                    c.execute('UPDATE assets SET display_order = %s WHERE id = %s AND user_id = %s', 
+                             (index, asset_id, user['id']))
+                else:
+                    c.execute('UPDATE assets SET display_order = ? WHERE id = ? AND user_id = ?', 
+                             (index, asset_id, user['id']))
+            conn.commit()
+            
+        return jsonify({'message': 'Order updated successfully'}), 200
+        
+    except Exception as e:
+        logger.error(f"❌ Error reordering assets: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
 
 @assets_bp.route('/add_asset', methods=['POST'])
 def add_asset():
@@ -113,10 +146,20 @@ def add_asset():
         symbol = request.form.get('symbol', '').strip()
         quantity = float(request.form.get('quantity', 0))
         
-        if not asset_type or not symbol or quantity <= 0:
+        if not asset_type or not symbol or quantity < 0:
             flash('入力内容を確認してください', 'error')
             return redirect(url_for('assets.manage_assets', asset_type=asset_type))
         
+        # 新しいアイテムは最後尾に追加するため、現在の最大display_orderを取得
+        with db_manager.get_db() as conn:
+            c = conn.cursor()
+            if db_manager.use_postgres:
+                c.execute('SELECT MAX(display_order) FROM assets WHERE user_id = %s AND asset_type = %s', (user_id, asset_type))
+            else:
+                c.execute('SELECT MAX(display_order) FROM assets WHERE user_id = ? AND asset_type = ?', (user_id, asset_type))
+            max_order = c.fetchone()[0]
+            new_order = (max_order or 0) + 1
+
         # 保険の場合
         if asset_type == 'insurance':
             name = request.form.get('name', '').strip()
@@ -126,13 +169,13 @@ def add_asset():
             with db_manager.get_db() as conn:
                 c = conn.cursor()
                 if db_manager.use_postgres:
-                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s)''',
-                             (user_id, asset_type, symbol, name, 0, price, avg_cost))
+                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost, display_order)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''',
+                             (user_id, asset_type, symbol, name, 0, price, avg_cost, new_order))
                 else:
-                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost)
-                                VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                             (user_id, asset_type, symbol, name, 0, price, avg_cost))
+                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost, display_order)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                             (user_id, asset_type, symbol, name, 0, price, avg_cost, new_order))
                 conn.commit()
             
             flash('保険を追加しました', 'success')
@@ -147,13 +190,13 @@ def add_asset():
             with db_manager.get_db() as conn:
                 c = conn.cursor()
                 if db_manager.use_postgres:
-                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s)''',
-                             (user_id, asset_type, symbol, name, quantity, price, avg_cost))
+                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost, display_order)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''',
+                             (user_id, asset_type, symbol, name, quantity, price, avg_cost, new_order))
                 else:
-                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost)
-                                VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                             (user_id, asset_type, symbol, name, quantity, price, avg_cost))
+                    c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost, display_order)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                             (user_id, asset_type, symbol, name, quantity, price, avg_cost, new_order))
                 conn.commit()
             
             flash('現金を追加しました', 'success')
@@ -161,13 +204,10 @@ def add_asset():
         
         # その他の資産
         avg_cost = float(request.form.get('avg_cost', 0))
-        if avg_cost <= 0:
-            flash('平均取得単価を正しく入力してください', 'error')
-            return redirect(url_for('assets.manage_assets', asset_type=asset_type))
-        
         price = 0.0
         name = symbol
         
+        # 価格取得を試みる
         try:
             price_data = price_service.fetch_price({'id': 0, 'asset_type': asset_type, 'symbol': symbol})
             if price_data and isinstance(price_data, dict):
@@ -179,13 +219,13 @@ def add_asset():
         with db_manager.get_db() as conn:
             c = conn.cursor()
             if db_manager.use_postgres:
-                c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s)''',
-                         (user_id, asset_type, symbol, name, quantity, price, avg_cost))
+                c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost, display_order)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''',
+                         (user_id, asset_type, symbol, name, quantity, price, avg_cost, new_order))
             else:
-                c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost)
-                            VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                         (user_id, asset_type, symbol, name, quantity, price, avg_cost))
+                c.execute('''INSERT INTO assets (user_id, asset_type, symbol, name, quantity, price, avg_cost, display_order)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                         (user_id, asset_type, symbol, name, quantity, price, avg_cost, new_order))
             conn.commit()
         
         flash('資産を追加しました', 'success')
@@ -279,7 +319,7 @@ def update_asset():
         quantity = float(request.form.get('quantity', 0))
         avg_cost = float(request.form.get('avg_cost', 0))
         
-        if quantity <= 0:
+        if quantity < 0:
             flash('数量を正しく入力してください', 'error')
             return redirect(url_for('assets.edit_asset', asset_id=asset_id))
         
@@ -388,14 +428,15 @@ def update_prices():
                     c.execute('UPDATE assets SET price = ?, name = ? WHERE id = ?', (new_price, new_name, asset_id))
             conn.commit()
         
-        # ✅ 手動更新後、即座にスナップショットを記録してグラフに反映
+        # Snapshot recording with enhanced logging
         try:
-            logger.info(f"📸 Recording snapshot after {asset_type} price update...")
+            logger.info(f"📸 Triggering snapshot after price update for {asset_type} (User: {user_id})")
             asset_service.record_asset_snapshot(user_id)
+            logger.info(f"✅ Snapshot recording requested successfully")
             flash(f'{len(updated_prices)}件の価格を更新し、最新データを保存しました', 'success')
         except Exception as snapshot_error:
-            logger.warning(f"⚠️ Failed to record snapshot: {snapshot_error}")
-            flash(f'{len(updated_prices)}件の価格を更新しました（スナップショット保存に失敗）', 'success')
+            logger.error(f"❌ Snapshot recording failed: {snapshot_error}", exc_info=True)
+            flash(f'{len(updated_prices)}件の価格を更新しました（スナップショット保存に失敗: {snapshot_error}）', 'success')
         
         return redirect(url_for('assets.manage_assets', asset_type=asset_type))
     
@@ -404,7 +445,6 @@ def update_prices():
         flash('価格の更新に失敗しました', 'error')
         return redirect(url_for('assets.manage_assets', asset_type=asset_type))
 
-# ✅ 修正: 誤字(@@)を修正し、正しく定義
 @assets_bp.route('/update_all_prices', methods=['POST'])
 def update_all_prices():
     """全資産の価格を更新 + スナップショット保存"""
@@ -455,14 +495,15 @@ def update_all_prices():
         
         logger.info(f"✅ Updated all prices ({len(updated_prices)} assets) for user {user_id}")
         
-        # ✅ 手動更新後、即座にスナップショットを記録してグラフに反映
+        # Snapshot recording with enhanced logging
         try:
-            logger.info(f"📸 Recording snapshot after price update for user {user_id}...")
+            logger.info(f"📸 Triggering snapshot after ALL price update (User: {user_id})")
             asset_service.record_asset_snapshot(user_id)
+            logger.info(f"✅ Snapshot recording requested successfully")
             flash(f'{len(updated_prices)}件の価格を更新し、最新データを保存しました', 'success')
         except Exception as snapshot_error:
-            logger.warning(f"⚠️ Failed to record snapshot after price update: {snapshot_error}")
-            flash(f'{len(updated_prices)}件の価格を更新しました（スナップショット保存に失敗）', 'success')
+            logger.error(f"❌ Snapshot recording failed: {snapshot_error}", exc_info=True)
+            flash(f'{len(updated_prices)}件の価格を更新しました（スナップショット保存に失敗: {snapshot_error}）', 'success')
         
         return redirect(url_for('dashboard.dashboard'))
     

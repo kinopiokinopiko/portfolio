@@ -2,7 +2,7 @@ services:
   - type: web
     name: portfolio-app
     env: python
-    runtime: python-3.11.10
+    runtime: python-3.11.9
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --access-logfile - --error-logfile - --log-level info app:app
     envVars:

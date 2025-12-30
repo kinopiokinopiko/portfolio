@@ -6,8 +6,6 @@ kinopio-2/
 ├── 📄 requirements.txt                 # Python依存パッケージ
 ├── 📄 README.md                        # プロジェクト説明
 ├── 📄 portfolio.db                     # SQLite データベース（ローカル用）
-├── 📄 use.py                           # ユーティリティスクリプト
-├── 📄 tempCodeRunnerFile.py            # 一時ファイル
 │
 ├── 📁 __pycache__/                     # Pythonキャッシュ
 │

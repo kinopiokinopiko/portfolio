@@ -212,7 +212,7 @@
             const manageHeader = document.querySelector('.header'); // Manage/Edit Assets header
             
             if (headerBar) {
-                // Dashboard: Group with the last element (Logout button)
+                // Dashboard: Group with the last element (which should be the privacy button)
                 const lastChild = headerBar.lastElementChild;
                 if (lastChild) {
                     const wrapper = document.createElement('div');
@@ -221,9 +221,11 @@
                     wrapper.style.gap = '12px';
                     
                     headerBar.replaceChild(wrapper, lastChild);
-                    // Order swapped: Theme Toggle first, then Logout
-                    wrapper.appendChild(btn);
+                    
+                    // ✅ 修正: 目のアイコン(lastChild)の後にテーマボタン(btn)を配置
+                    // [目のアイコン] [テーマ切り替え]
                     wrapper.appendChild(lastChild);
+                    wrapper.appendChild(btn);
                 } else {
                     headerBar.appendChild(btn);
                 }

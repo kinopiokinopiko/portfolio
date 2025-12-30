@@ -5,6 +5,9 @@
 # 暗号通貨銘柄
 CRYPTO_SYMBOLS = ['BTC', 'ETH', 'XRP', 'DOGE']
 
+# 貴金属銘柄 (新規追加)
+PRECIOUS_METAL_SYMBOLS = ['Gold', 'Platinum', 'Silver']
+
 # 投資信託銘柄
 INVESTMENT_TRUST_INFO = {
     'S&P500': 'https://www.rakuten-sec.co.jp/web/fund/detail/?ID=JP90C000GKC6',
@@ -24,7 +27,7 @@ ASSET_TYPE_LABELS = {
     'jp_stock': '日本株',
     'us_stock': '米国株',
     'cash': '現金',
-    'gold': '金 (Gold)',
+    'gold': '貴金属',  # 変更: 金(Gold) -> 貴金属
     'crypto': '暗号資産',
     'investment_trust': '投資信託',
     'insurance': '保険'
@@ -43,7 +46,7 @@ ASSET_TYPE_INFO = {
         'quantity_label': '株数'
     },
     'gold': {
-        'title': '金 (Gold)',
+        'title': '貴金属',  # 変更
         'symbol_label': '種類',
         'quantity_label': '重量(g)'
     },

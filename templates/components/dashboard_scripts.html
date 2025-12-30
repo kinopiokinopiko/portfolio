@@ -26,9 +26,80 @@ function showTab(tabName, clickedButton) {
 Chart.register(ChartDataLabels);
 
 document.addEventListener('DOMContentLoaded', function() {
+    // ---------------------------------------------------------
+    // プライバシーモード機能
+    // ---------------------------------------------------------
+    const privacyBtn = document.getElementById('privacy-toggle-btn');
+    const eyeIcon = document.getElementById('eye-icon');
+    
+    // 隠すべき要素のセレクタ (金額 + バッジの%表示)
+    const privacySelectors = [
+        '.total-amount',       // 総資産
+        '.profit-amount',      // 損益額
+        '.day-change-amount',  // 前日比額
+        '.card-amount-new',    // カードの資産額
+        '.detail-amount',      // カードの詳細金額
+        '.profit-badge',       // 損益%バッジ
+        '.day-change-badge',   // 前日比%バッジ
+        '.detail-badge'        // 詳細バッジ
+    ];
+
+    // ページロード時に現在の値を保存
+    const elementsToHide = document.querySelectorAll(privacySelectors.join(','));
+    elementsToHide.forEach(el => {
+        if (!el.getAttribute('data-original')) {
+            el.setAttribute('data-original', el.innerText.trim());
+        }
+    });
+
+    // アイコンSVG定義
+    const iconEyeOpen = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    const iconEyeClosed = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+
+    function setPrivacyMode(isPrivate) {
+        // 状態保存
+        localStorage.setItem('privacy_mode', isPrivate);
+        
+        // アイコンとタイトル切り替え
+        if (isPrivate) {
+            eyeIcon.innerHTML = iconEyeClosed;
+            privacyBtn.setAttribute('title', '金額を表示');
+        } else {
+            eyeIcon.innerHTML = iconEyeOpen;
+            privacyBtn.setAttribute('title', '金額を隠す');
+        }
+
+        // 表示切り替え
+        elementsToHide.forEach(el => {
+            if (isPrivate) {
+                el.innerText = '*****';
+            } else {
+                el.innerText = el.getAttribute('data-original');
+            }
+        });
+    }
+
+    // 初期状態の適用
+    const savedMode = localStorage.getItem('privacy_mode') === 'true';
+    if (savedMode) {
+        setPrivacyMode(true);
+    }
+
+    // クリックイベント
+    if (privacyBtn) {
+        privacyBtn.addEventListener('click', function() {
+            const currentMode = localStorage.getItem('privacy_mode') === 'true';
+            setPrivacyMode(!currentMode);
+        });
+    }
+
+
+    // ---------------------------------------------------------
+    // チャート描画処理
+    // ---------------------------------------------------------
     const chartDataJSON = '{{ chart_data | safe }}';
     const historyDataJSON = '{{ history_data | safe }}';
-    let myLineChart, myBarChart; 
+    let myLineChart;
 
     const assetColors = [
         '#E63946', '#457B9D', '#F4A261', '#E9C46A', 
@@ -79,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     options: {
                         responsive: true, 
                         maintainAspectRatio: false,
+                        devicePixelRatio: 3, // ✅ 高画質化
                         plugins: {
                             legend: { display: false },
                             title: { display: false },
@@ -119,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     { label: '日本株', data: historyData.jp_stock, color: assetColors[0], hidden: true },
                     { label: '米国株', data: historyData.us_stock, color: assetColors[1], hidden: true },
                     { label: '現金', data: historyData.cash, color: assetColors[2], hidden: true },
-                    { label: '金', data: historyData.gold, color: assetColors[3], hidden: true },
+                    { label: '貴金属', data: historyData.gold, color: assetColors[3], hidden: true },
                     { label: '暗号資産', data: historyData.crypto, color: assetColors[4], hidden: true },
                     { label: '投資信託', data: historyData.investment_trust, color: assetColors[5], hidden: true },
                     { label: '保険', data: historyData.insurance, color: assetColors[6], hidden: true }
@@ -134,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     data: { labels: historyData.dates, datasets: lineDatasets },
                     options: {
                         responsive: true, maintainAspectRatio: false,
+                        devicePixelRatio: 3, // ✅ 高画質化
                         plugins: { 
                             legend: { display: false }, 
                             title: { display: false },
@@ -153,50 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         if (value >= 1e8) return `¥${(value/1e8).toFixed(1)}億`;
                                         if (value >= 1e4) return `¥${(value/1e4).toFixed(0)}万`;
                                         return `¥${value.toLocaleString()}`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                const ctxHistory = document.getElementById('assetHistoryChart').getContext('2d');
-                const barThicknessOptions = {
-                    barPercentage: 0.2,
-                    categoryPercentage: 0.5
-                };
-                myBarChart = new Chart(ctxHistory, {
-                    type: 'bar',
-                    data: {
-                        labels: historyData.dates,
-                        datasets: [
-                            { label: '日本株', data: historyData.jp_stock, backgroundColor: assetColors[0], ...barThicknessOptions },
-                            { label: '米国株', data: historyData.us_stock, backgroundColor: assetColors[1], ...barThicknessOptions },
-                            { label: '現金', data: historyData.cash, backgroundColor: assetColors[2], ...barThicknessOptions },
-                            { label: '金', data: historyData.gold, backgroundColor: assetColors[3], ...barThicknessOptions },
-                            { label: '暗号資産', data: historyData.crypto, backgroundColor: assetColors[4], ...barThicknessOptions },
-                            { label: '投資信託', data: historyData.investment_trust, backgroundColor: assetColors[5], ...barThicknessOptions },
-                            { label: '保険', data: historyData.insurance, backgroundColor: assetColors[6], ...barThicknessOptions }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: { display: false },
-                            tooltip: { mode: 'index', intersect: false },
-                            legend: { display: false },
-                            datalabels: { display: false }
-                        },
-                        scales: {
-                            x: { stacked: true },
-                            y: {
-                                stacked: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        if (value >= 100000000) return '¥' + (value / 100000000).toFixed(1) + '億';
-                                        if (value >= 10000) return '¥' + (value / 10000).toLocaleString() + '万';
-                                        return '¥' + value.toLocaleString();
                                     }
                                 }
                             }
@@ -230,41 +259,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
                 updateLineVisuals();
-
-                const barToggles = document.querySelectorAll('.bar-toggle');
-                const updateBarVisuals = () => {
-                    barToggles.forEach(toggle => {
-                        const colorBox = toggle.nextElementSibling;
-                        if (colorBox) colorBox.style.opacity = toggle.checked ? '1.0' : '0.4';
-                    });
-                };
-                document.getElementById('toggle-all-bars').addEventListener('change', (e) => {
-                    const isChecked = e.target.checked;
-                    barToggles.forEach(toggle => {
-                        toggle.checked = isChecked;
-                        const index = toggle.getAttribute('data-dataset-index');
-                        myBarChart.getDatasetMeta(parseInt(index)).hidden = !isChecked;
-                    });
-                    myBarChart.update();
-                    updateBarVisuals();
-                });
-                barToggles.forEach(toggle => {
-                    toggle.addEventListener('change', () => {
-                        const index = toggle.getAttribute('data-dataset-index');
-                        myBarChart.getDatasetMeta(parseInt(index)).hidden = !toggle.checked;
-                        myBarChart.update();
-                        updateBarVisuals();
-                    });
-                });
-                updateBarVisuals();
             }
         } catch (e) { console.error("History chart error:", e); }
     }
     
+    // 初期タブ表示の処理
     const portfolioButton = document.querySelector('.tab-nav .tab-btn.active');
     if (portfolioButton) {
         showTab('portfolio', portfolioButton);
     }
 });
 </script>
-

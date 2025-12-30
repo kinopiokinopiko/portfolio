@@ -212,8 +212,8 @@ class DatabaseManager:
                     except Exception as e:
                         logger.error(f"❌ Error returning connection to pool: {e}")
         else:
-            # SQLite
-            conn = sqlite3.connect('portfolio.db', timeout=10.0)
+            # SQLite: タイムアウトを30秒に延長（ロック対策）
+            conn = sqlite3.connect('portfolio.db', timeout=30.0)
             conn.row_factory = sqlite3.Row
             try:
                 yield conn
@@ -277,7 +277,7 @@ class DatabaseManager:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )''')
             
-            # assetsテーブル
+            # assetsテーブル（display_order追加）
             cursor.execute('''CREATE TABLE IF NOT EXISTS assets (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
@@ -287,6 +287,7 @@ class DatabaseManager:
                 quantity DOUBLE PRECISION NOT NULL,
                 price DOUBLE PRECISION DEFAULT 0,
                 avg_cost DOUBLE PRECISION DEFAULT 0,
+                display_order INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             )''')
@@ -316,6 +317,31 @@ class DatabaseManager:
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
                 UNIQUE(user_id, record_date)
             )''')
+            
+            # ✅ スキーママイグレーション（PostgreSQL）
+            # 新しいカラムが存在するか確認し、なければ追加する
+            
+            # 1. asset_history の前日比カラム
+            history_columns = [
+                'prev_jp_stock_value', 'prev_us_stock_value', 'prev_cash_value',
+                'prev_gold_value', 'prev_crypto_value', 'prev_investment_trust_value',
+                'prev_insurance_value', 'prev_total_value'
+            ]
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'asset_history'")
+            existing_history_cols = [row['column_name'] for row in cursor.fetchall()]
+            
+            for col in history_columns:
+                if col not in existing_history_cols:
+                    logger.info(f"🔄 Migrating: Adding missing column '{col}' to asset_history")
+                    cursor.execute(f"ALTER TABLE asset_history ADD COLUMN {col} DOUBLE PRECISION DEFAULT 0")
+
+            # 2. assets の display_order カラム
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'assets'")
+            existing_assets_cols = [row['column_name'] for row in cursor.fetchall()]
+            
+            if 'display_order' not in existing_assets_cols:
+                logger.info("🔄 Migrating: Adding 'display_order' column to assets table")
+                cursor.execute("ALTER TABLE assets ADD COLUMN display_order INTEGER DEFAULT 0")
             
             # インデックス作成
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_assets_user_id ON assets(user_id)')
@@ -367,6 +393,7 @@ class DatabaseManager:
                 quantity REAL NOT NULL,
                 price REAL DEFAULT 0,
                 avg_cost REAL DEFAULT 0,
+                display_order INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             )''')
@@ -395,6 +422,31 @@ class DatabaseManager:
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
                 UNIQUE(user_id, record_date)
             )''')
+            
+            # ✅ スキーママイグレーション（SQLite）
+            
+            # 1. asset_history の前日比カラム
+            history_columns = [
+                'prev_jp_stock_value', 'prev_us_stock_value', 'prev_cash_value',
+                'prev_gold_value', 'prev_crypto_value', 'prev_investment_trust_value',
+                'prev_insurance_value', 'prev_total_value'
+            ]
+            
+            cursor.execute("PRAGMA table_info(asset_history)")
+            existing_history_cols = [row['name'] for row in cursor.fetchall()]
+            
+            for col in history_columns:
+                if col not in existing_history_cols:
+                    logger.info(f"🔄 Migrating: Adding missing column '{col}' to asset_history")
+                    cursor.execute(f"ALTER TABLE asset_history ADD COLUMN {col} REAL DEFAULT 0")
+
+            # 2. assets の display_order カラム
+            cursor.execute("PRAGMA table_info(assets)")
+            existing_assets_cols = [row['name'] for row in cursor.fetchall()]
+            
+            if 'display_order' not in existing_assets_cols:
+                logger.info("🔄 Migrating: Adding 'display_order' column to assets table")
+                cursor.execute("ALTER TABLE assets ADD COLUMN display_order INTEGER DEFAULT 0")
             
             # インデックス作成
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_assets_user_id ON assets(user_id)')

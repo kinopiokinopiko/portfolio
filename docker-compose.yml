@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # アプリ本体
+  web:
+    build: .
+    restart: always
+    ports:
+      - "80:5000"  # 外から80番(http)に来たら、中の5000番に繋ぐ
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=change_this_to_something_secure
+      # ここでサーバー内のDBに接続する設定を書く
+      - DATABASE_URL=postgresql://user:password@db:5432/portfolio_db
+    depends_on:
+      - db
+
+  # データベース (PostgreSQL)
+  # Neonの代わりに、自分のサーバー内で動かします
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=portfolio_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# データを永続化するための領域
+volumes:
+  postgres_data:
